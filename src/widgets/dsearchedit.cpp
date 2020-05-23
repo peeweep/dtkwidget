@@ -116,14 +116,15 @@ public:
 
     Q_SLOT void onResult(const QString &json)
     {
-        QJsonDocument document = QJsonDocument::fromJson(json.toLocal8Bit());
+        QJsonDocument jsondoc = QJsonDocument::fromJson(json.toLocal8Bit());
 
-        if (!document.isObject()) {
+        if (!jsondoc.isObject()) {
             return;
         }
+	QJsonObject document = jsondoc.object();
 
-        document = QJsonDocument::fromJson(document["text"].toString().toLocal8Bit());
-        const QJsonArray &words = document["ws"].toArray();
+        document = QJsonDocument::fromJson(document["text"].toString().toLocal8Bit()).object();
+	const QJsonArray &words = document["ws"].toArray();
         bool replace = document["pgs"].toString() == "rpl";
 
         if (replace) {
@@ -131,10 +132,10 @@ public:
         }
 
         for (const QJsonValue &v : words) {
-            const QJsonArray &cw = v["cw"].toArray();
+            const QJsonArray &cw = v.toObject()["cw"].toArray();
 
             for (const QJsonValue &v : cw) {
-                m_message.append(v["w"].toString());
+                m_message.append(v.toObject()["w"].toString());
             }
         }
 
